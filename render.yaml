@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: tweetify-api
+    runtime: node
+    plan: free
+    rootDir: server
+    # Installs the whole npm workspace (so shared root deps resolve) then builds just the server.
+    buildCommand: cd .. && npm install && npm run build:server
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: TEST_RESET_SECRET
+        sync: false

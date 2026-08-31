@@ -1,0 +1,20 @@
+{
+  "name": "database-automation",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build:server": "npm run build --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "seed": "npm run seed --workspace=server",
+    "reset": "npm run reset --workspace=server"
+  },
+  "overrides": {
+    "tar": "^7.5.22"
+  }
+}
