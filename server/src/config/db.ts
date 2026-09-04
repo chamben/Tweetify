@@ -7,6 +7,12 @@ function maskUri(uri: string): string {
 }
 
 export async function connectDB(): Promise<void> {
+  // On warm serverless invocations mongoose's default connection is still open from the
+  // previous call, so skip re-connecting (avoids redundant work/logging per request).
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
   mongoose.set('strictQuery', true);
   await mongoose.connect(env.mongoUri);
   console.log(`[db] connected to MongoDB at ${maskUri(env.mongoUri)}`);
