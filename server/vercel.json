@@ -1,6 +1,8 @@
 {
   "installCommand": "cd .. && npm install",
+  "buildCommand": "echo \"No build needed: @vercel/node compiles api/index.ts and its src/ imports directly\"",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
+
