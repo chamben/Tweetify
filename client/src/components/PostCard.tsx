@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Post } from '../types';
 import { LikeButton } from './LikeButton';
 import { Avatar } from './Avatar';
+import { ConfirmDialog } from './ConfirmDialog';
 import { CommentIcon, EditIcon, DeleteIcon } from './icons';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
 
@@ -19,6 +20,7 @@ export function PostCard({ post, onDeleted, onUpdated }: PostCardProps): JSX.Ele
   const isOwner = user?.id === post.author._id;
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(post.content);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   async function handleSave(): Promise<void> {
     const { data } = await apiClient.put<Post>(`/api/posts/${post._id}`, { content });
@@ -27,6 +29,7 @@ export function PostCard({ post, onDeleted, onUpdated }: PostCardProps): JSX.Ele
   }
 
   async function handleDelete(): Promise<void> {
+    setConfirmingDelete(false);
     await apiClient.delete(`/api/posts/${post._id}`);
     onDeleted(post._id);
   }
@@ -67,7 +70,7 @@ export function PostCard({ post, onDeleted, onUpdated }: PostCardProps): JSX.Ele
           <div className="post-actions">
             <LikeButton postId={post._id} />
             <Link to={`/posts/${post._id}`} className="icon-button" data-testid={`post-detail-link-${post._id}`}>
-              <CommentIcon /> Comments
+              <CommentIcon /> Comments <span data-testid={`comment-count-${post._id}`}>{post.commentsCount}</span>
             </Link>
             {isOwner && !isEditing && (
               <>
@@ -79,8 +82,8 @@ export function PostCard({ post, onDeleted, onUpdated }: PostCardProps): JSX.Ele
                   <EditIcon />
                 </button>
                 <button
-                  className="icon-button danger"
-                  onClick={handleDelete}
+                  className="icon-button"
+                  onClick={() => setConfirmingDelete(true)}
                   data-testid={`post-delete-button-${post._id}`}
                 >
                   <DeleteIcon />
@@ -90,6 +93,13 @@ export function PostCard({ post, onDeleted, onUpdated }: PostCardProps): JSX.Ele
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete post?"
+        message="Are you sure you want to delete this post?"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }

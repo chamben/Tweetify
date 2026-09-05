@@ -209,11 +209,6 @@ a:hover {
   background: rgba(249, 24, 128, 0.1);
 }
 
-.icon-button.danger:hover {
-  background: rgba(244, 33, 46, 0.1);
-  color: var(--color-danger);
-}
-
 /* Forms */
 
 .form-field {
@@ -291,8 +286,55 @@ button.secondary:hover {
   background: rgba(29, 155, 240, 0.1);
 }
 
+button.danger {
+  background: var(--color-danger);
+}
+
+button.danger:hover {
+  background: #d81b25;
+}
+
 button.full-width {
   width: 100%;
+}
+
+/* Modal */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 25, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-dialog {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(15, 20, 25, 0.25);
+}
+
+.modal-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.modal-message {
+  margin: 0 0 20px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 /* Misc */

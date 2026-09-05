@@ -1,5 +1,7 @@
 import { Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
 import { Post } from '../models/Post';
+import { Comment } from '../models/Comment';
 import { ApiError } from '../middleware/errorHandler';
 import { AuthenticatedRequest } from '../middleware/auth';
 
@@ -8,7 +10,7 @@ export async function createPost(req: AuthenticatedRequest, res: Response, next:
     const { content } = req.body as { content: string };
     const post = await Post.create({ author: req.user!.userId, content });
     await post.populate('author', 'username');
-    res.status(201).json(post);
+    res.status(201).json({ ...post.toObject(), commentsCount: 0 });
   } catch (err) {
     next(err);
   }
@@ -26,7 +28,13 @@ export async function listPosts(req: AuthenticatedRequest, res: Response, next: 
       .populate('author', 'username')
       .lean();
 
-    res.json(posts);
+    const commentCounts = await Comment.aggregate<{ _id: Types.ObjectId; count: number }>([
+      { $match: { post: { $in: posts.map((post) => post._id) } } },
+      { $group: { _id: '$post', count: { $sum: 1 } } },
+    ]);
+    const countByPostId = new Map(commentCounts.map((entry) => [entry._id.toString(), entry.count]));
+
+    res.json(posts.map((post) => ({ ...post, commentsCount: countByPostId.get(post._id.toString()) ?? 0 })));
   } catch (err) {
     next(err);
   }
@@ -38,7 +46,8 @@ export async function getPost(req: AuthenticatedRequest, res: Response, next: Ne
     if (!post) {
       throw new ApiError(404, 'Post not found');
     }
-    res.json(post);
+    const commentsCount = await Comment.countDocuments({ post: post._id });
+    res.json({ ...post, commentsCount });
   } catch (err) {
     next(err);
   }
@@ -60,7 +69,8 @@ export async function updatePost(req: AuthenticatedRequest, res: Response, next:
     await post.save();
     await post.populate('author', 'username');
 
-    res.json(post);
+    const commentsCount = await Comment.countDocuments({ post: post._id });
+    res.json({ ...post.toObject(), commentsCount });
   } catch (err) {
     next(err);
   }

@@ -3,6 +3,7 @@ import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { Comment } from '../types';
 import { Avatar } from './Avatar';
+import { ConfirmDialog } from './ConfirmDialog';
 import { EditIcon, DeleteIcon } from './icons';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
 
@@ -12,6 +13,7 @@ export function CommentList({ postId }: { postId: string }): JSX.Element {
   const [newComment, setNewComment] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     apiClient.get<Comment[]>(`/api/posts/${postId}/comments`).then(({ data }) => setComments(data));
@@ -32,6 +34,7 @@ export function CommentList({ postId }: { postId: string }): JSX.Element {
   }
 
   async function handleDelete(commentId: string): Promise<void> {
+    setDeletingId(null);
     await apiClient.delete(`/api/comments/${commentId}`);
     setComments((prev) => prev.filter((c) => c._id !== commentId));
   }
@@ -102,8 +105,8 @@ export function CommentList({ postId }: { postId: string }): JSX.Element {
                     <EditIcon />
                   </button>
                   <button
-                    className="icon-button danger"
-                    onClick={() => handleDelete(comment._id)}
+                    className="icon-button"
+                    onClick={() => setDeletingId(comment._id)}
                     data-testid={`comment-delete-button-${comment._id}`}
                   >
                     <DeleteIcon />
@@ -114,6 +117,13 @@ export function CommentList({ postId }: { postId: string }): JSX.Element {
           </div>
         </div>
       ))}
+      <ConfirmDialog
+        open={deletingId !== null}
+        title="Delete comment?"
+        message="Are you sure you want to delete this comment?"
+        onConfirm={() => deletingId && handleDelete(deletingId)}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 }
